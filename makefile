@@ -1,4 +1,6 @@
-TARGET=target/traffic-1.0-SNAPSHOT.jar
+VERSION ?= 1.0
+
+TARGET=target/traffic-$(VERSION)-SNAPSHOT.jar
 
 .PHONY: all clean
 

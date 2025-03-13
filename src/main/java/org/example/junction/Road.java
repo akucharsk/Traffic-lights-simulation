@@ -1,4 +1,4 @@
-package org.example;
+package org.example.junction;
 
 
 import java.util.HashMap;
@@ -31,7 +31,7 @@ public class Road {
     public Vehicle removeVehicle(Lane lane) {
         if (vehicles.get(lane).isEmpty())
             return null;
-        return vehicles.get(lane).removeFirst();
+        return vehicles.get(lane).remove(0);
     }
 
     public TrafficLights getLight(Lane lane) {

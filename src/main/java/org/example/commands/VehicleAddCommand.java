@@ -1,4 +1,8 @@
-package org.example;
+package org.example.commands;
+
+import org.example.junction.Direction;
+import org.example.junction.Junction;
+import org.example.junction.Vehicle;
 
 public class VehicleAddCommand implements Command{
     private final String vehicleId;

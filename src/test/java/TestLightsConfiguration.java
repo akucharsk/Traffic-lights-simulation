@@ -1,4 +1,4 @@
-import org.example.*;
+import org.example.junction.*;
 import org.junit.Test;
 
 import java.util.List;

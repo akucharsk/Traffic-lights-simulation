@@ -1,5 +1,5 @@
-import org.example.Direction;
-import org.example.Lane;
+import org.example.junction.Direction;
+import org.example.junction.Lane;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;

@@ -1,4 +1,4 @@
-package org.example;
+package org.example.junction;
 
 public enum Lane {
     LEFT, MIDDLE, RIGHT;

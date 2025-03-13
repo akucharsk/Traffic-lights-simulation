@@ -1,4 +1,7 @@
-package org.example;
+package org.example.commands;
+
+import org.example.junction.Junction;
+import org.example.junction.Vehicle;
 
 import java.util.ArrayList;
 import java.util.List;

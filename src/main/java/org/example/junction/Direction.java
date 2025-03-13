@@ -1,4 +1,4 @@
-package org.example;
+package org.example.junction;
 
 public enum Direction {
     NORTH, SOUTH, EAST, WEST;
@@ -33,7 +33,7 @@ public enum Direction {
         return right().opposite();
     }
 
-    static Direction fromString(String direction) {
+    public static Direction fromString(String direction) {
         return switch (direction) {
             case "north":
                 yield NORTH;

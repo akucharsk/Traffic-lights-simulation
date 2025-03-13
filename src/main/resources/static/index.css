@@ -1,0 +1,36 @@
+.m-bot-10p {
+    margin-bottom: 10%;
+}
+
+.m-right-10p {
+    margin-right: 10%;
+}
+
+.m-top-10p {
+    margin-top: 10%;
+}
+
+.m-left-10p {
+    margin-left: 10%;
+}
+
+.m-top-5p {
+    margin-top: 5%;
+}
+
+.m-bot-5p {
+    margin-bottom: 5%;
+}
+
+.bg-lightgray {
+    background-color: gray;
+}
+
+.flex {
+    display: flex;
+}
+
+.flex-col {
+    display: flex;
+    flex-direction: column;
+}

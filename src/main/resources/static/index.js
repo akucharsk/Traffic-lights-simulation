@@ -1,11 +1,17 @@
+function setAutoconfigureID() {
+    const idEntry = document.getElementById('vehicleID');
+    if (idEntry.disabled) {
+        idEntry.disabled = false;
+        window.canvasHandler.disableAutoConfig();
+    } else {
+        idEntry.disabled = true;
+        window.canvasHandler.enableAutoConfig();
+    }
+}
 
 async function addVehicle() {
-    const vehicleID = document.getElementById('vehicleID').value;
+    const vehicleID = window.canvasHandler.acquireVehicleID();
     const error = document.getElementById("error");
-    if (vehicleID === undefined) {
-        error.textContent = "Vehicle ID is missing";
-        return;
-    }
     const start = document.getElementById("start-road").value;
     const end = document.getElementById("end-road").value;
 
@@ -22,5 +28,13 @@ async function addVehicle() {
         }
     )
     const data = await resp.json();
+    console.log(data);
+    await window.canvasHandler.addVehicle(vehicleID, start, data);
+}
+
+async function makeStep() {
+    const resp = await fetch("/api/step");
+    const data = await resp.json();
+    await window.canvasHandler.clearVehicles();
     await window.canvasHandler.configureVehicles(JSON.parse(data));
 }

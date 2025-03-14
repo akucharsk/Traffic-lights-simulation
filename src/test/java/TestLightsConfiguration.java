@@ -9,7 +9,7 @@ public class TestLightsConfiguration {
     private Road road;
 
     private void setup() {
-        road = new Road();
+        road = new Road(Direction.NORTH);
         List<TrafficLights> lights = List.of(
                 new TrafficLights(road, Lane.LEFT),
                 new TrafficLights(road, Lane.MIDDLE),

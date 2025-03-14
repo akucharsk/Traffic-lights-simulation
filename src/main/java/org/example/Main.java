@@ -34,27 +34,27 @@ public class Main {
                     socket.receive(recv);
                     String data = new String(recv.getData(), StandardCharsets.UTF_8);
 
-                    Command cmd = null;
-                    System.out.println(data);
-                    if (data.startsWith("VADD"))
-                        cmd = VehicleAddCommand.parse(data);
-                    else if (data.startsWith("STEP"))
-                        cmd = new StepCommand();
-                    else if (data.startsWith("STOP"))
-                        break;
+                    byte[] msg = "ok".getBytes(StandardCharsets.UTF_8);
+                    if (data.startsWith("VADD")) {
+                        VehicleAddCommand cmd = VehicleAddCommand.parse(data);
+                        cmd.setJunction(junction);
+                        cmd.execute();
+                        String[] parts = data.split(";");
 
-                    if (cmd != null){
+                        msg = Lane.appropriateLane(parts[2], parts[3])
+                                .toString().toLowerCase().getBytes(StandardCharsets.UTF_8);
+                    }
+                    else if (data.startsWith("STEP")) {
+                        StepCommand cmd = new StepCommand();
                         cmd.setJunction(junction);
                         cmd.execute();
 
-                        byte[] buf = mapper.writeValueAsString(junction).getBytes(StandardCharsets.UTF_8);
-                        DatagramPacket send = new DatagramPacket(buf, buf.length, recv.getAddress(), recv.getPort());
-                        socket.send(send);
-                    } else {
-                        byte[] msg = "ok".getBytes(StandardCharsets.UTF_8);
-                        DatagramPacket send = new DatagramPacket(msg, msg.length, recv.getAddress(), recv.getPort());
-                        socket.send(send);
+                        msg = mapper.writeValueAsBytes(junction);
                     }
+                    else if (data.startsWith("STOP"))
+                        break;
+                    DatagramPacket send = new DatagramPacket(msg, msg.length, recv.getAddress(), recv.getPort());
+                    socket.send(send);
                 }
             } catch (Exception e) {
                 e.printStackTrace();

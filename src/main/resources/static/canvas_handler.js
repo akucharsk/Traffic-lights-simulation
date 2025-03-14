@@ -4,6 +4,8 @@ export default class CanvasHandler {
         canvas.width = (window.innerWidth - opts.clientWidth) * 0.8;
         canvas.height = window.innerHeight * 0.9;
 
+        this.lowestVehicleID = 0;
+
         this.ctx = canvas.getContext('2d');
         this.width = canvas.width;
         this.height = canvas.height;
@@ -41,6 +43,7 @@ export default class CanvasHandler {
             "west": {"left": [], "middle": [], "right": []},
             "east": {"left": [], "middle": [], "right": []},
         }
+        this.vehiclesByID = {};
         this.vehicleLength = laneWidth / 2;
         this.vehicleWidth = laneWidth / 4;
 
@@ -75,18 +78,18 @@ export default class CanvasHandler {
                     x: cornerWidth, y: cornerHeight + 2.5 * laneWidth
                 },
                 "right": {
-                    x: cornerWidth, y: cornerWidth + 3.5 * laneWidth
+                    x: cornerWidth, y: cornerHeight + 3.5 * laneWidth
                 }
             },
             "east": {
                 "left": {
-                    x: this.width - cornerWidth, y: cornerHeight + 0.5 * laneWidth
+                    x: this.width - cornerWidth, y: cornerHeight + 2.5 * laneWidth
                 },
                 "middle": {
                     x: this.width - cornerWidth, y: cornerHeight + 1.5 * laneWidth
                 },
                 "right": {
-                    x: this.width - cornerWidth, y: cornerHeight + 2.5 * laneWidth
+                    x: this.width - cornerWidth, y: cornerHeight + 0.5 * laneWidth
                 }},
         }
 
@@ -206,6 +209,11 @@ export default class CanvasHandler {
         }
     }
 
+    acquireVehicleID() {
+        this.lowestVehicleID++;
+        return this.lowestVehicleID;
+    }
+
     _addLaneSeparators() {
         const sepWidth = Math.min(this.cornerWidth, this.cornerHeight) / 10;
         this.sepWidth = sepWidth;
@@ -285,95 +293,77 @@ export default class CanvasHandler {
         }
     }
 
-    configureLights(config) {
-
-        const drawLight = function (params) {
-            this.ctx.beginPath();
-            this.ctx.arc(params.x, params.y, params.r, 0, 2 * Math.PI);
-            this.ctx.fill();
-        }.bind(this);
-        for (const direction of ["north", "south", "east", "west"]) {
-            const fieldName = `${direction}Lights`;
-
-            const leftColor = config[direction].left;
-            this.ctx.fillStyle = leftColor;
-            drawLight(this[fieldName]["left"][leftColor]);
-
-            const midColor = config[direction].middle;
-            this.ctx.fillStyle = midColor;
-            drawLight(this[fieldName]["middle"][midColor]);
-
-            const rightColor = config[direction].right;
-            this.ctx.fillStyle = rightColor;
-            drawLight(this[fieldName]["right"][rightColor]);
-        }
+    drawLight(params) {
+        this.ctx.beginPath();
+        this.ctx.arc(params.x, params.y, params.r, 0, 2 * Math.PI);
+        this.ctx.fill();
     }
 
-    vehicleOperation(id, road, lane, add=true) {
+    addVehicle(id, road, lane, color=null) {
         const vehicleAmount = this.vehicles[road][lane].length;
         this.vehicles[road][lane].push(id);
         var junction;
         var vehicle;
+        color = color !== null ? color :
+            `rgb(${Math.random() * 128}, ${Math.random() * 128}, ${Math.random() * 128})`
+        this.ctx.fillStyle = color;
         switch (road) {
             case "north":
                 junction = this.junctionIntersections[road][lane];
-                vehicle = {id: id, x: junction.x, y: junction.y - (2 * vehicleAmount + 1) * this.vehicleLength,
+                vehicle = {id: id, color: color, x: junction.x - this.vehicleWidth / 2,
+                    y: junction.y - (vehicleAmount + 2) * this.vehicleLength,
                     w: this.vehicleWidth, h: this.vehicleLength}
-                if (add) {
-                    this.ctx.fillRect(vehicle.x, vehicle.y, vehicle.w, vehicle.h);
-                    this.vehicles[road][lane].push(vehicle);
-                } else {
-                    this.ctx.clearRect(vehicle.x, vehicle.y, vehicle.w, vehicle.h);
-                }
                 break;
             case "south":
                 junction = this.junctionIntersections[road][lane];
-                vehicle = {id: id, x: junction.x, y: junction.y + (2 * vehicleAmount + 1) * this.vehicleLength,
+                vehicle = {id: id, color: color, x: junction.x - this.vehicleWidth / 2,
+                    y: junction.y + (vehicleAmount + 1) * this.vehicleLength,
                     w: this.vehicleWidth, h: this.vehicleLength}
-                if (add) {
-                    this.ctx.fillRect(vehicle.x, vehicle.y, vehicle.w, vehicle.h);
-                    this.vehicles[road][lane].push(vehicle);
-                } else {
-                    this.ctx.clearRect(vehicle.x, vehicle.y, vehicle.w, vehicle.h);
-                }
                 break;
             case "west":
                 junction = this.junctionIntersections[road][lane];
-                vehicle = {id: id, x: junction.x - (2 * vehicleAmount + 1) * this.vehicleLength,
-                    y: junction.y, w: this.vehicleLength, h: this.vehicleWidth}
-                if (add) {
-                    this.ctx.fillRect(vehicle.x, vehicle.y, vehicle.w, vehicle.h);
-                    this.vehicles[road][lane].push(vehicle);
-                } else {
-                    this.ctx.clearRect(vehicle.x, vehicle.y, vehicle.w, vehicle.h);
-                }
+                vehicle = {id: id, color: color, x: junction.x - (vehicleAmount + 2) * this.vehicleLength,
+                    y: junction.y - this.vehicleWidth / 2, w: this.vehicleLength, h: this.vehicleWidth}
                 break;
             case "east":
                 junction = this.junctionIntersections[road][lane];
-                vehicle = {id: id, x: junction.x + (2 * vehicleAmount + 1) * this.vehicleLength,
-                    y: junction.y, w: this.vehicleLength, h: this.vehicleWidth}
-                if (add) {
-                    this.ctx.fillRect(vehicle.x, vehicle.y, vehicle.w, vehicle.h);
-                    this.vehicles[road][lane].push(vehicle);
-                } else {
-                    this.ctx.clearRect(vehicle.x, vehicle.y, vehicle.w, vehicle.h);
-                }
+                vehicle = {id: id, color: color, x: junction.x + (vehicleAmount + 1) * this.vehicleLength,
+                    y: junction.y - this.vehicleWidth / 2, w: this.vehicleLength, h: this.vehicleWidth}
                 break;
         }
+        this.ctx.fillRect(vehicle.x, vehicle.y, vehicle.w, vehicle.h);
+        this.vehicles[road][lane].push(vehicle);
+        this.vehiclesByID[id] = vehicle;
     }
 
     configureVehicles(map) {
         for (const direction of ["north", "south", "east", "west"]) {
             for (const lane of ["left", "middle", "right"]) {
-                for (const id of this.vehicles[direction][lane]) {
-                    this.vehicleOperation(
-                        id, direction, lane, false
-                    );
+                this.vehicles[direction][lane] = [];
+                for (const id of map[direction][lane]["vehicles"]) {
+                    const color = this.vehiclesByID[id] !== undefined ?
+                        this.vehiclesByID[id].color : null;
+                    this.addVehicle(id, direction, lane, color);
+                }
+                const lights = `${direction}Lights`;
+                const light = this[lights][lane];
+                this.ctx.fillStyle = "black";
+                this.ctx.fillRect(light.x, light.y, light.w, light.h);
+
+                const color = map[direction][lane]["lights"];
+                this.ctx.fillStyle = color;
+                this.drawLight(light[color]);
+            }
+        }
+    }
+
+    clearVehicles() {
+        for (const direction of ["north", "south", "east", "west"]) {
+            for (const lane of ["left", "middle", "right"]) {
+                for (const vehicle of this.vehicles[direction][lane]) {
+                    this.ctx.clearRect(vehicle.x - 2, vehicle.y - 2, vehicle.w + 4, vehicle.h + 4);
                 }
                 this.vehicles[direction][lane] = [];
-                for (const id of map[direction][lane]) {
-                    this.vehicleOperation(id, direction, lane);
-                }
             }
         }
     }

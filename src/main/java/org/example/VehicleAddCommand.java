@@ -49,4 +49,16 @@ public class VehicleAddCommand implements Command{
         return vehicleId + "," + startRoad + "," + endRoad;
     }
 
+    public String getVehicleId() {
+        return vehicleId;
+    }
+
+    public String getStartRoad() {
+        return startRoad;
+    }
+
+    public String getEndRoad() {
+        return endRoad;
+    }
+
 }

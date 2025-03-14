@@ -17,10 +17,10 @@ public class Junction {
     public static final int EAST_WEST_LEFT_TURN = 3;
 
     public Junction() {
-        roads.put(Direction.NORTH, new Road());
-        roads.put(Direction.SOUTH, new Road());
-        roads.put(Direction.EAST, new Road());
-        roads.put(Direction.WEST, new Road());
+        roads.put(Direction.NORTH, new Road(Direction.NORTH));
+        roads.put(Direction.SOUTH, new Road(Direction.SOUTH));
+        roads.put(Direction.EAST, new Road(Direction.EAST));
+        roads.put(Direction.WEST, new Road(Direction.WEST));
 
         configurations.add(new TrafficLightsConfiguration(List.of(
                 roads.get(Direction.NORTH).getLight(Lane.MIDDLE),
@@ -77,7 +77,9 @@ public class Junction {
             if (departed != null)
                 departedVehicles.add(departed);
         }
-        configurations.get(configurationIdx).registerActiveStep();
+        TrafficLightsConfiguration config = configurations.get(configurationIdx);
+        config.registerActiveStep();
+        config.deactivateLights();
 
         double priority = Double.NEGATIVE_INFINITY;
 
@@ -92,8 +94,14 @@ public class Junction {
         if (priority == Double.NEGATIVE_INFINITY) {
             lightsOnDemand = true;
         }
+        config = configurations.get(configurationIdx);
+        config.activateLights();
 
         return departedVehicles;
+    }
+
+    public TrafficLightsConfiguration getActiveConfiguration() {
+        return configurations.get(configurationIdx);
     }
 
     public boolean lightsOnDemand() {

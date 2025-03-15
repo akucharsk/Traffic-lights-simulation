@@ -1,4 +1,5 @@
 import Vehicle from "./vehicle.js";
+import TrafficLight from "./traffic_light.js";
 
 export default class CanvasHandler {
     constructor(canvas) {
@@ -48,6 +49,7 @@ export default class CanvasHandler {
         }
 
         this.vehicles = {};
+        this.lights = structuredClone(this.vehicleLocations);
         Vehicle.vehicleLength = laneWidth / 2;
         Vehicle.vehicleWidth = laneWidth / 4;
         Vehicle.stepSize = Vehicle.vehicleLength * 1.5;
@@ -115,6 +117,8 @@ export default class CanvasHandler {
             cornerWidth, sepLineWidth);
 
         this._addLaneSeparators();
+        TrafficLight.lightWidth = 1.2 * this.sepWidth;
+        TrafficLight.lightHeight = 2.2 * this.sepWidth;
         this.lightWidth = 1.2 * this.sepWidth;
         this.lightHeight = 2.2 * this.sepWidth;
 
@@ -123,94 +127,52 @@ export default class CanvasHandler {
         // North road lights
         this.ctx.fillRect(cornerWidth - 2 * sepLineWidth, cornerHeight - 2 * sepLineWidth,
             3 * laneWidth - 2 * sepLineWidth, sepLineWidth);
-        this.northLights = {}
         const northConfig = ["right", "middle", "left"]
         for (let i = 0; i < 3; i++) {
-            const light = {
-                x: cornerWidth + laneWidth * (i + 0.5) - this.lightWidth / 2,
-                y: cornerHeight - sepLineWidth - this.lightHeight / 2,
-                w: this.lightWidth,
-                h: this.lightHeight,
-            }
-            this.northLights[northConfig[i]] = light;
-            this.ctx.fillRect(light.x, light.y, light.w, light.h);
-        }
-        for (const config of northConfig) {
-            const light = this.northLights[config];
-            this.northLights[config]["red"] = {x: light.x + light.w / 2, y: light.y + 5 * light.h / 6, r: light.h / 6};
-            this.northLights[config]["yellow"] = {x: light.x + light.w / 2, y: light.y + light.h / 2, r: light.h / 6};
-            this.northLights[config]["green"] = {x: light.x + light.w / 2, y: light.y + light.h / 6, r: light.h / 6};
+            this.lights["north"][northConfig[i]] = new TrafficLight(
+                "north", northConfig[i],
+                cornerWidth + laneWidth * (i + 0.5) - this.lightWidth / 2,
+                cornerHeight - sepLineWidth - this.lightHeight / 2
+            );
         }
 
         // South road lights
         this.ctx.fillRect(cornerWidth - 2 * sepLineWidth, cornerHeight + laneWidth + 4 * sepLineWidth,
             sepLineWidth, 3 * laneWidth - 2  *sepLineWidth)
 
-        this.southLights = {}
         const southConfig = ["left", "middle", "right"]
         for (let i = 0; i < 3; i++) {
-            const light = {
-                x: cornerWidth + laneWidth * (i + 1.5) - this.lightWidth / 2,
-                y: this.height - cornerHeight + sepLineWidth - this.lightHeight / 2,
-                w: this.lightWidth,
-                h: this.lightHeight,
-            }
-            this.southLights[southConfig[i]] = light;
-            this.ctx.fillRect(light.x, light.y, light.w, light.h);
-        }
-
-        for (const config of southConfig) {
-            const light = this.southLights[config];
-            this.southLights[config]["red"] = {x: light.x + light.w / 2, y: light.y + light.h / 6, r: light.h / 6};
-            this.southLights[config]["yellow"] = {x: light.x + light.w / 2, y: light.y + light.h / 2, r: light.h / 6};
-            this.southLights[config]["green"] = {x: light.x + light.w / 2, y: light.y + 5 * light.h / 6, r: light.h / 6};
+            this.lights["south"][southConfig[i]] = new TrafficLight(
+                "south", southConfig[i],
+                cornerWidth + laneWidth * (i + 1.5) - this.lightWidth / 2,
+                this.height - cornerHeight + sepLineWidth - this.lightHeight / 2
+            );
         }
 
         // West road lights
         this.ctx.fillRect(cornerWidth + laneWidth + 4 * sepLineWidth, this.height - cornerHeight + sepLineWidth,
             3 * laneWidth - 2  *sepLineWidth, sepLineWidth);
 
-        this.westLights = {}
         const westConfig = ["left", "middle", "right"]
         for (let i = 0; i < 3; i++) {
-            const light = {
-                x: cornerWidth - sepLineWidth - this.lightHeight / 2,
-                y: cornerHeight + laneWidth * (i + 1.5) - this.lightWidth / 2,
-                w: this.lightHeight,
-                h: this.lightWidth
-            }
-            this.westLights[westConfig[i]] = light;
-            this.ctx.fillRect(light.x, light.y, light.w, light.h);
-        }
-        for (const config of westConfig) {
-            const light = this.westLights[config];
-            this.westLights[config]["red"] = {x: light.x + 5 * light.w / 6, y: light.y + light.h / 2, r: light.w / 6};
-            this.westLights[config]["yellow"] = {x: light.x + light.w / 2, y: light.y + light.h / 2, r: light.w / 6};
-            this.westLights[config]["green"] = {x: light.x + light.w / 6, y: light.y + light.h / 2, r: light.w / 6};
+            this.lights["west"][westConfig[i]] = new TrafficLight(
+                "west", westConfig[i],
+                cornerWidth - sepLineWidth - this.lightHeight / 2,
+                cornerHeight + laneWidth * (i + 1.5) - this.lightWidth / 2,
+            );
         }
 
         // East road lights
         this.ctx.fillRect(this.width - cornerWidth + sepLineWidth, cornerHeight - 2 * sepLineWidth,
             sepLineWidth, 3 * laneWidth - 2 * sepLineWidth);
 
-        this.eastLights = {}
         const eastConfig = ["right", "middle", "left"]
         for (let i = 0; i < 3; i++) {
-            const light = {
-                x: this.width - cornerWidth + sepLineWidth - this.lightHeight / 2,
-                y: cornerHeight + laneWidth * (i + 0.5) - this.lightWidth / 2,
-                w: this.lightHeight,
-                h: this.lightWidth,
-            }
-            this.eastLights[eastConfig[i]] = light;
-            this.ctx.fillRect(light.x, light.y, light.w, light.h);
-        }
-
-        for (const config of eastConfig) {
-            const light = this.eastLights[config];
-            this.eastLights[config]["red"] = {x: light.x + light.w / 6, y: light.y + light.h / 2, r: light.w / 6};
-            this.eastLights[config]["yellow"] = {x: light.x + light.w / 2, y: light.y + light.h / 2, r: light.w / 6};
-            this.eastLights[config]["green"] = {x: light.x + 5 * light.w / 6, y: light.y + light.h / 2, r: light.w / 6};
+            this.lights["east"][eastConfig[i]] = new TrafficLight(
+                "east", eastConfig[i],
+                this.width - cornerWidth + sepLineWidth - this.lightHeight / 2,
+                cornerHeight + laneWidth * (i + 0.5) - this.lightWidth / 2
+            )
         }
     }
 
@@ -298,12 +260,6 @@ export default class CanvasHandler {
         }
     }
 
-    drawLight(params) {
-        this.ctx.beginPath();
-        this.ctx.arc(params.x, params.y, params.r, 0, 2 * Math.PI);
-        this.ctx.fill();
-    }
-
     addVehicle(id, road, lane, color=null) {
         this.vehicleAmount++;
         const vehicle = new Vehicle(id, road, lane, color);
@@ -329,12 +285,7 @@ export default class CanvasHandler {
         for (const direction of ["north", "south", "east", "west"]) {
             for (const lane of ["left", "middle", "right"]) {
                 const color = lightConfig[direction][lane];
-                const key = `${direction}Lights`;
-                const light = this[key][lane];
-                this.ctx.fillStyle = "black";
-                this.ctx.fillRect(light.x, light.y, light.w, light.h);
-                this.ctx.fillStyle = color;
-                this.drawLight(this[key][lane][color]);
+                this.lights[direction][lane].setState(color);
             }
         }
     }

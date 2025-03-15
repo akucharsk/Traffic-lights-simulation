@@ -8,6 +8,7 @@ import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -29,6 +30,7 @@ public class Main {
 
                 final int msgSize = 4096;
                 Junction junction = new Junction();
+                List<List<Vehicle>> departedVehicles = StepCommand.getDepartedVehicles();
                 while (true) {
                     DatagramPacket recv = new DatagramPacket(new byte[msgSize], msgSize);
                     socket.receive(recv);
@@ -49,10 +51,13 @@ public class Main {
                         cmd.setJunction(junction);
                         cmd.execute();
 
-                        msg = mapper.writeValueAsBytes(junction);
+                        msg = mapper.writeValueAsString(junction).getBytes(StandardCharsets.UTF_8);
                     }
                     else if (data.startsWith("STOP"))
                         break;
+                    else if (data.startsWith("LIGHTS")) {
+                        msg = mapper.writeValueAsString(junction).getBytes(StandardCharsets.UTF_8);
+                    }
                     DatagramPacket send = new DatagramPacket(msg, msg.length, recv.getAddress(), recv.getPort());
                     socket.send(send);
                 }

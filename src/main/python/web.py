@@ -58,6 +58,12 @@ async def hello(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
+@app.get("/api/lights")
+async def get_lights(request: Request):
+    msg = await send("LIGHTS")
+    return fastapi.responses.JSONResponse(content=str(msg, "utf-8"), status_code=200)
+
+
 @app.get("/api/step")
 async def make_step(request: Request):
     msg = await send("STEP")

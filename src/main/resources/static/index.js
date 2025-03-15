@@ -1,14 +1,3 @@
-function setAutoconfigureID() {
-    const idEntry = document.getElementById('vehicleID');
-    if (idEntry.disabled) {
-        idEntry.disabled = false;
-        window.canvasHandler.disableAutoConfig();
-    } else {
-        idEntry.disabled = true;
-        window.canvasHandler.enableAutoConfig();
-    }
-}
-
 async function addVehicle() {
     const vehicleID = window.canvasHandler.acquireVehicleID();
     const error = document.getElementById("error");
@@ -28,13 +17,28 @@ async function addVehicle() {
         }
     )
     const data = await resp.json();
-    console.log(data);
     await window.canvasHandler.addVehicle(vehicleID, start, data);
+
+    if (window.canvasHandler.vehicleAmount === 1)
+        await requestLights();
 }
 
 async function makeStep() {
     const resp = await fetch("/api/step");
     const data = await resp.json();
-    await window.canvasHandler.clearVehicles();
-    await window.canvasHandler.configureVehicles(JSON.parse(data));
+    const jsonData = JSON.parse(data);
+    console.log(jsonData);
+    const lightConfig = jsonData["lights"];
+    const departedVehicles = jsonData["departedVehicles"];
+    console.log(departedVehicles);
+    await window.canvasHandler.moveVehicles(departedVehicles);
+    await window.canvasHandler.configureLights(lightConfig);
+}
+
+async function requestLights() {
+    const resp = await fetch("/api/lights");
+    const data = await resp.json();
+    const lights = JSON.parse(data);
+    console.log(lights);
+    await window.canvasHandler.configureLights(lights["lights"]);
 }

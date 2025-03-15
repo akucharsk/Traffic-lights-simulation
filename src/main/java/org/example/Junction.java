@@ -53,10 +53,13 @@ public class Junction {
         road.addVehicle(Lane.appropriateLane(from, to), vehicle);
 
         if (lightsOnDemand) {
+            configurations.get(configurationIdx).deactivateLights();
             lightsOnDemand = false;
             for (int i = 0; i < configurations.size(); i++) {
                 if (configurations.get(i).getWaitingVehicles() > 0) {
                     configurationIdx = i;
+                    configurations.get(i).activateLights();
+                    System.out.println(configurationIdx);
                     break;
                 }
             }
@@ -79,21 +82,32 @@ public class Junction {
         }
         TrafficLightsConfiguration config = configurations.get(configurationIdx);
         config.registerActiveStep();
-        config.deactivateLights();
 
-        double priority = Double.NEGATIVE_INFINITY;
+        double priority = config.getPriority();
 
-        for (int i = 0; i < configurations.size(); i++) {
+        int firstLiveConfigIdx = -1;
+        int bestPriorityIdx = configurationIdx;
+        int i = (configurationIdx + 1) % configurations.size();
+        while (i != configurationIdx) {
             double configPriority = configurations.get(i).getPriority();
+            if (firstLiveConfigIdx < 0 && configPriority > Double.NEGATIVE_INFINITY)
+                firstLiveConfigIdx = i;
+
             if (configPriority > priority) {
                 priority = configPriority;
-                configurationIdx = i;
+                bestPriorityIdx = i;
             }
+            i = (i + 1) % configurations.size();
         }
-
-        if (priority == Double.NEGATIVE_INFINITY) {
+        if (firstLiveConfigIdx < 0) {
             lightsOnDemand = true;
+            return departedVehicles;
         }
+        if (bestPriorityIdx == configurationIdx)
+            return departedVehicles;
+
+        configurationIdx = firstLiveConfigIdx;
+        config.deactivateLights();
         config = configurations.get(configurationIdx);
         config.activateLights();
 

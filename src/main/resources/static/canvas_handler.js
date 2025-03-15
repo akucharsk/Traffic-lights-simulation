@@ -1,3 +1,5 @@
+import Vehicle from "./vehicle.js";
+
 export default class CanvasHandler {
     constructor(canvas) {
         const opts = document.getElementById("opts");
@@ -5,6 +7,7 @@ export default class CanvasHandler {
         canvas.height = window.innerHeight * 0.9;
 
         this.lowestVehicleID = 0;
+        this.vehicleAmount = 0;
 
         this.ctx = canvas.getContext('2d');
         this.width = canvas.width;
@@ -37,15 +40,17 @@ export default class CanvasHandler {
         this.laneWidth = laneWidth;
         this.sepLineWidth = sepLineWidth;
 
-        this.vehicles = {
+        this.vehicleLocations = {
             "north": {"left": [], "middle": [], "right": []},
             "south": {"left": [], "middle": [], "right": []},
             "west": {"left": [], "middle": [], "right": []},
             "east": {"left": [], "middle": [], "right": []},
         }
-        this.vehiclesByID = {};
-        this.vehicleLength = laneWidth / 2;
-        this.vehicleWidth = laneWidth / 4;
+
+        this.vehicles = {};
+        Vehicle.vehicleLength = laneWidth / 2;
+        Vehicle.vehicleWidth = laneWidth / 4;
+        Vehicle.stepSize = Vehicle.vehicleLength * 1.5;
 
         this.junctionIntersections = {
             "north": {
@@ -300,70 +305,36 @@ export default class CanvasHandler {
     }
 
     addVehicle(id, road, lane, color=null) {
-        const vehicleAmount = this.vehicles[road][lane].length;
-        this.vehicles[road][lane].push(id);
-        var junction;
-        var vehicle;
-        color = color !== null ? color :
-            `rgb(${Math.random() * 128}, ${Math.random() * 128}, ${Math.random() * 128})`
-        this.ctx.fillStyle = color;
-        switch (road) {
-            case "north":
-                junction = this.junctionIntersections[road][lane];
-                vehicle = {id: id, color: color, x: junction.x - this.vehicleWidth / 2,
-                    y: junction.y - (vehicleAmount + 2) * this.vehicleLength,
-                    w: this.vehicleWidth, h: this.vehicleLength}
-                break;
-            case "south":
-                junction = this.junctionIntersections[road][lane];
-                vehicle = {id: id, color: color, x: junction.x - this.vehicleWidth / 2,
-                    y: junction.y + (vehicleAmount + 1) * this.vehicleLength,
-                    w: this.vehicleWidth, h: this.vehicleLength}
-                break;
-            case "west":
-                junction = this.junctionIntersections[road][lane];
-                vehicle = {id: id, color: color, x: junction.x - (vehicleAmount + 2) * this.vehicleLength,
-                    y: junction.y - this.vehicleWidth / 2, w: this.vehicleLength, h: this.vehicleWidth}
-                break;
-            case "east":
-                junction = this.junctionIntersections[road][lane];
-                vehicle = {id: id, color: color, x: junction.x + (vehicleAmount + 1) * this.vehicleLength,
-                    y: junction.y - this.vehicleWidth / 2, w: this.vehicleLength, h: this.vehicleWidth}
-                break;
-        }
-        this.ctx.fillRect(vehicle.x, vehicle.y, vehicle.w, vehicle.h);
-        this.vehicles[road][lane].push(vehicle);
-        this.vehiclesByID[id] = vehicle;
+        this.vehicleAmount++;
+        const vehicle = new Vehicle(id, road, lane, color);
+        this.vehicles[id] = vehicle;
+        this.vehicleLocations[road][lane].push(id);
+        vehicle.draw();
     }
 
-    configureVehicles(map) {
+    moveVehicles(vehicleIDs) {
+        for (const id of vehicleIDs) {
+            const vehicle = this.vehicles[id];
+            vehicle.erase();
+            this.vehicleAmount--;
+            const neighbors = this.vehicleLocations[vehicle.startRoad][vehicle.startLane];
+            neighbors.shift();
+            neighbors.forEach(function (vehicleID) {this.vehicles[vehicleID].moveForward();}.bind(this))
+
+            delete this.vehicles[id];
+        }
+    }
+
+    configureLights(lightConfig) {
         for (const direction of ["north", "south", "east", "west"]) {
             for (const lane of ["left", "middle", "right"]) {
-                this.vehicles[direction][lane] = [];
-                for (const id of map[direction][lane]["vehicles"]) {
-                    const color = this.vehiclesByID[id] !== undefined ?
-                        this.vehiclesByID[id].color : null;
-                    this.addVehicle(id, direction, lane, color);
-                }
-                const lights = `${direction}Lights`;
-                const light = this[lights][lane];
+                const color = lightConfig[direction][lane];
+                const key = `${direction}Lights`;
+                const light = this[key][lane];
                 this.ctx.fillStyle = "black";
                 this.ctx.fillRect(light.x, light.y, light.w, light.h);
-
-                const color = map[direction][lane]["lights"];
                 this.ctx.fillStyle = color;
-                this.drawLight(light[color]);
-            }
-        }
-    }
-
-    clearVehicles() {
-        for (const direction of ["north", "south", "east", "west"]) {
-            for (const lane of ["left", "middle", "right"]) {
-                for (const vehicle of this.vehicles[direction][lane]) {
-                    this.ctx.clearRect(vehicle.x - 2, vehicle.y - 2, vehicle.w + 4, vehicle.h + 4);
-                }
-                this.vehicles[direction][lane] = [];
+                this.drawLight(this[key][lane][color]);
             }
         }
     }

@@ -5,24 +5,13 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class TrafficLightsConfiguration {
-    private double priority = 0;
     private int activeSteps = 0;
     private int passiveSteps = 0;
     private final List<TrafficLights> parallelLights = new ArrayList<>();
     private boolean isActive = false;
-    private int expectedStepsTillEmpty = 0;
 
     public TrafficLightsConfiguration(List<TrafficLights> lights) {
         parallelLights.addAll(lights);
-        expectedStepsTillEmpty = getStepsTillEmpty();
-    }
-
-    public int getActiveSteps() {
-        return activeSteps;
-    }
-
-    public int getPassiveSteps() {
-        return passiveSteps;
     }
 
     public void activateLights() {
@@ -32,6 +21,7 @@ public class TrafficLightsConfiguration {
 
     public void deactivateLights() {
         isActive = false;
+        activeSteps = 0;
         parallelLights.forEach(TrafficLights::deactivate);
     }
 
@@ -47,10 +37,12 @@ public class TrafficLightsConfiguration {
         }
 
         if (!isActive) {
-            return (double) waitingVehicles / (stepsTillEmpty + 1);
+            int redLightVehicles = getRedLightVehicles();
+            return redLightVehicles == 0 ?
+                    Double.NEGATIVE_INFINITY :
+                    (double) redLightVehicles / stepsTillEmpty;
         }
-
-        return (double) waitingVehicles / (activeSteps - 5);
+        return (double) waitingVehicles / (stepsTillEmpty + activeSteps - 5);
     }
 
     public List<TrafficLights> getParallelLights() {
@@ -59,18 +51,20 @@ public class TrafficLightsConfiguration {
 
     public void registerActiveStep() {
         activeSteps++;
-        passiveSteps = 0;
-    }
-
-    public void registerPassiveStep() {
-        passiveSteps++;
-        activeSteps = 0;
     }
 
     private Stream<Integer> getVehicleCounts() {
         return parallelLights
                 .stream()
                 .map(lights -> lights.getRoad().getVehicles(lights.getLane()).size());
+    }
+
+    public int getRedLightVehicles() {
+        return parallelLights
+                .stream()
+                .filter(TrafficLights::isRed)
+                .map(lights -> lights.getRoad().getVehicles(lights.getLane()).size())
+                .reduce(0, Integer::sum);
     }
 
     public int getWaitingVehicles() {

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width: device-width, initial-scale=1.0">
+    <title>Traffic Lights Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/index.css">
+</head>
+<body class="h-screen">
+<div class="flex justify-center mx-auto gap-20 w-screen">
+    <div class="flex justify-center items-center" id="opts">
+        <div class="flex-col gap-5">
+            <div class="flex gap-5 items-center">
+                <label for="start-road" class="text-4x1 font-bold">
+                    Choose the start road:
+                </label>
+                <select id="start-road" class="p-2 my-2">
+                    <option value="north">North</option>
+                    <option value="south">South</option>
+                    <option value="east">East</option>
+                    <option value="west">West</option>
+                </select>
+            </div>
+            <div class="flex gap-5 items-center">
+                <label for="end-road" class="text-4x1 font-bold">
+                    Choose the end road:
+                </label>
+                <select id="end-road" class="p-2 my-2">
+                    <option value="north">North</option>
+                    <option value="south">South</option>
+                    <option value="east">East</option>
+                    <option value="west">West</option>
+                </select>
+            </div>
+            <button class="p-5 bg-blue-50 font-bold text-lg" onclick="addVehicle()">
+                Submit
+            </button>
+            <div id="error" class="text-red-500"></div>
+            <button class="p-5 bg-green-100 font-bold m-y-10" onclick="makeStep()">
+                Make Step
+            </button>
+        </div>
+    </div>
+    <canvas class="my-10" id="main-canvas"></canvas>
+</div>
+</body>
+<script src="/static/index.js"></script>
+
+<script type="module">
+    import CanvasHandler from "/static/canvas_handler.js";
+
+    const canvas = document.getElementById("main-canvas");
+    window.canvasHandler = new CanvasHandler(canvas);
+</script>
+</html>

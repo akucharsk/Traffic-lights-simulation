@@ -16,6 +16,8 @@ public class TrafficLights {
         return isGreen;
     }
 
+    public boolean isRed() {return !isGreen;}
+
     public void activate() {
         this.isGreen = true;
     }

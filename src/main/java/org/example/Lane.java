@@ -12,4 +12,8 @@ public enum Lane {
             return MIDDLE;
         }
     }
+
+    public static Lane appropriateLane(String startRoad, String endRoad) {
+        return appropriateLane(Direction.fromString(startRoad), Direction.fromString(endRoad));
+    }
 }

@@ -17,10 +17,10 @@ public class Junction {
     public static final int EAST_WEST_LEFT_TURN = 3;
 
     public Junction() {
-        roads.put(Direction.NORTH, new Road());
-        roads.put(Direction.SOUTH, new Road());
-        roads.put(Direction.EAST, new Road());
-        roads.put(Direction.WEST, new Road());
+        roads.put(Direction.NORTH, new Road(Direction.NORTH));
+        roads.put(Direction.SOUTH, new Road(Direction.SOUTH));
+        roads.put(Direction.EAST, new Road(Direction.EAST));
+        roads.put(Direction.WEST, new Road(Direction.WEST));
 
         configurations.add(new TrafficLightsConfiguration(List.of(
                 roads.get(Direction.NORTH).getLight(Lane.MIDDLE),
@@ -53,10 +53,13 @@ public class Junction {
         road.addVehicle(Lane.appropriateLane(from, to), vehicle);
 
         if (lightsOnDemand) {
+            configurations.get(configurationIdx).deactivateLights();
             lightsOnDemand = false;
             for (int i = 0; i < configurations.size(); i++) {
                 if (configurations.get(i).getWaitingVehicles() > 0) {
                     configurationIdx = i;
+                    configurations.get(i).activateLights();
+                    System.out.println(configurationIdx);
                     break;
                 }
             }
@@ -77,23 +80,42 @@ public class Junction {
             if (departed != null)
                 departedVehicles.add(departed);
         }
-        configurations.get(configurationIdx).registerActiveStep();
+        TrafficLightsConfiguration config = configurations.get(configurationIdx);
+        config.registerActiveStep();
 
-        double priority = Double.NEGATIVE_INFINITY;
+        double priority = config.getPriority();
 
-        for (int i = 0; i < configurations.size(); i++) {
+        int firstLiveConfigIdx = -1;
+        int bestPriorityIdx = configurationIdx;
+        int i = (configurationIdx + 1) % configurations.size();
+        while (i != configurationIdx) {
             double configPriority = configurations.get(i).getPriority();
+            if (firstLiveConfigIdx < 0 && configPriority > Double.NEGATIVE_INFINITY)
+                firstLiveConfigIdx = i;
+
             if (configPriority > priority) {
                 priority = configPriority;
-                configurationIdx = i;
+                bestPriorityIdx = i;
             }
+            i = (i + 1) % configurations.size();
         }
-
-        if (priority == Double.NEGATIVE_INFINITY) {
+        if (firstLiveConfigIdx < 0) {
             lightsOnDemand = true;
+            return departedVehicles;
         }
+        if (bestPriorityIdx == configurationIdx)
+            return departedVehicles;
+
+        configurationIdx = firstLiveConfigIdx;
+        config.deactivateLights();
+        config = configurations.get(configurationIdx);
+        config.activateLights();
 
         return departedVehicles;
+    }
+
+    public TrafficLightsConfiguration getActiveConfiguration() {
+        return configurations.get(configurationIdx);
     }
 
     public boolean lightsOnDemand() {

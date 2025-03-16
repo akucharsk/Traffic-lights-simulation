@@ -5,27 +5,19 @@ public enum Direction {
 
     public Direction right() {
         return switch (this) {
-            case NORTH:
-                yield WEST;
-            case WEST:
-                yield SOUTH;
-            case SOUTH:
-                yield EAST;
-            case EAST:
-                yield NORTH;
+            case NORTH -> WEST;
+            case WEST -> SOUTH;
+            case SOUTH -> EAST;
+            case EAST -> NORTH;
         };
     }
 
     public Direction opposite() {
         return switch (this) {
-            case NORTH:
-                yield SOUTH;
-            case SOUTH:
-                yield NORTH;
-            case EAST:
-                yield WEST;
-            case WEST:
-                yield EAST;
+            case NORTH -> SOUTH;
+            case SOUTH -> NORTH;
+            case EAST -> WEST;
+            case WEST -> EAST;
         };
     }
 
@@ -34,17 +26,12 @@ public enum Direction {
     }
 
     static Direction fromString(String direction) {
-        return switch (direction) {
-            case "north":
-                yield NORTH;
-            case "south":
-                yield SOUTH;
-            case "east":
-                yield EAST;
-            case "west":
-                yield WEST;
-            default:
-                throw new IllegalStateException("Unexpected value: " + direction);
+        return switch (direction.toLowerCase().strip()) {
+            case "north" -> NORTH;
+            case "south" -> SOUTH;
+            case "east" -> EAST;
+            case "west" -> WEST;
+            default -> throw new IllegalStateException("Unexpected value: " + direction);
         };
     }
 }

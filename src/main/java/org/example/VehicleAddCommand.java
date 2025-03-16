@@ -1,5 +1,7 @@
 package org.example;
 
+import java.util.List;
+
 public class VehicleAddCommand implements Command{
     private final String vehicleId;
     private final String startRoad;
@@ -13,6 +15,17 @@ public class VehicleAddCommand implements Command{
         this.endRoad = endRoad;
     }
 
+    // accepted format: VADD;<id>;<start-road>;<end-road>
+    public static VehicleAddCommand parse(String line) {
+        if (!line.startsWith("VADD;"))
+            return null;
+        String[] elements = line.split(";");
+        if (elements.length < 4) {
+            return null;
+        }
+        return new VehicleAddCommand(elements[1], elements[2], elements[3]);
+    }
+
     @Override
     public void setJunction(Junction junction) {
         this.junction = junction;
@@ -21,7 +34,9 @@ public class VehicleAddCommand implements Command{
     @Override
     public void execute() {
         Vehicle vehicle = new Vehicle(vehicleId);
-        junction.addVehicle(vehicle, Direction.fromString(startRoad), Direction.fromString(endRoad));
+        junction.addVehicle(vehicle,
+                Direction.fromString(startRoad),
+                Direction.fromString(endRoad));
     }
 
     @Override
@@ -32,6 +47,18 @@ public class VehicleAddCommand implements Command{
     @Override
     public String toString() {
         return vehicleId + "," + startRoad + "," + endRoad;
+    }
+
+    public String getVehicleId() {
+        return vehicleId;
+    }
+
+    public String getStartRoad() {
+        return startRoad;
+    }
+
+    public String getEndRoad() {
+        return endRoad;
     }
 
 }

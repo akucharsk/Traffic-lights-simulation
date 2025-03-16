@@ -9,8 +9,10 @@ import java.util.Map;
 public class Road {
     private final Map<Lane, List<Vehicle>> vehicles = new HashMap<>();
     private final Map<Lane, TrafficLights> lights = new HashMap<>();
+    private final Direction direction;
 
-    public Road() {
+    public Road(Direction direction) {
+        this.direction = direction;
         vehicles.put(Lane.LEFT, new LinkedList<>());
         vehicles.put(Lane.MIDDLE, new LinkedList<>());
         vehicles.put(Lane.RIGHT, new LinkedList<>());
@@ -31,14 +33,18 @@ public class Road {
     public Vehicle removeVehicle(Lane lane) {
         if (vehicles.get(lane).isEmpty())
             return null;
-        return vehicles.get(lane).removeFirst();
+        return vehicles.get(lane).remove(0);
     }
 
     public TrafficLights getLight(Lane lane) {
         return lights.get(lane);
     }
 
+    public Direction getDirection() {
+        return direction;
+    }
+
     public String toString() {
-        return vehicles.toString();
+        return direction + ":" + vehicles;
     }
 }

@@ -4,7 +4,7 @@ async function addVehicle() {
     const start = document.getElementById("start-road").value;
     const end = document.getElementById("end-road").value;
 
-    if (start == end) {
+    if (start === end) {
         error.textContent = "Start road and end road must be different";
         return;
     }
@@ -16,8 +16,8 @@ async function addVehicle() {
             body: JSON.stringify({vehicleID: vehicleID, startRoad: start, endRoad: end})
         }
     )
-    const data = await resp.json();
-    await window.canvasHandler.addVehicle(vehicleID, start, data);
+    const lane = await resp.json();
+    await window.canvasHandler.addVehicle(vehicleID, start, end, lane);
 
     if (window.canvasHandler.vehicleAmount === 1)
         await requestLights();

@@ -1,14 +1,14 @@
 export default class TrafficLight {
     static lightWidth;
     static lightHeight;
+    static ctx;
 
     constructor(road, lane, x, y) {
         this.x = x;
         this.y = y;
-        this.state = "red";
-        this.ctx = window.canvasHandler.ctx;
+        this.state = ["red"];
 
-        if (road in ["north", "south"]){
+        if (road === "north" || road === "south") {
             this.w = TrafficLight.lightWidth;
             this.h = TrafficLight.lightHeight;
         } else {
@@ -43,30 +43,39 @@ export default class TrafficLight {
     }
 
     clear() {
-        this.ctx.fillStyle = "black";
-        this.ctx.fillRect(this.x, this.y, this.w, this.h);
+        TrafficLight.ctx.fillStyle = "black";
+        TrafficLight.ctx.fillRect(this.x, this.y, this.w, this.h);
     }
 
     draw(color) {
-        this.ctx.fillStyle = color;
-        this.ctx.beginPath();
-        this.ctx.arc(this[color].x, this[color].y, this[color].r, 0, 2 * Math.PI, false);
-        this.ctx.fill();
+        TrafficLight.ctx.fillStyle = color;
+        TrafficLight.ctx.beginPath();
+        TrafficLight.ctx.arc(this[color].x, this[color].y, this[color].r, 0, 2 * Math.PI, false);
+        TrafficLight.ctx.fill();
     }
 
-    setState(state) {
-        if (this.state === state)
+    paint() {
+        this.clear();
+        for (const state of this.state)
+            this.draw(state);
+    }
+
+    async setState(state) {
+        if (this.state.length === 1 && this.state[0] === state)
             return;
-        if (this.state === "green") {
+
+        if (state === "red") {
             this.clear();
+            this.state = ["yellow"]
             this.draw("yellow");
             return new Promise((resolve, reject) => {
                 setTimeout(resolve, 500);
-            }).then(() => {this.clear(); this.draw("red");});
+            }).then(() => {this.clear(); this.draw("red"); this.state = ["red"]});
         }
+        this.state.push("yellow");
         this.draw("yellow");
         return new Promise((resolve, reject) => {
             setTimeout(resolve, 500);
-        }).then(() => {this.clear(); this.draw("green");});
+        }).then(() => {this.clear(); this.draw("green"); this.state = ["green"];});
     }
 }

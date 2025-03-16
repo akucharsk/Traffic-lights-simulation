@@ -8,7 +8,7 @@ WEB_APP='src.main.python.web:app'
 all: compile package run
 
 web: compile package
-	java -jar $(TARGET) & uvicorn $(WEB_APP) --reload
+	java -jar $(TARGET)
 
 compile:
 	@mvn compile

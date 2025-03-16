@@ -3,6 +3,12 @@ package org.example;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.*;
 import java.net.*;
@@ -10,14 +16,22 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
+
+@SpringBootApplication
 public class Main {
+
     public static void main(String[] args) throws IOException {
         if (args.length > 0) {
             String inputFile = args[0];
             String outputFile = args[1];
             Main.runOffline();
         } else {
-            DatagramSocket socket = null;
+            SpringApplication.run(Main.class);
+        }
+    }
+
+    private static void runOnline() {
+        DatagramSocket socket = null;
             try {
                 socket = new DatagramSocket(10000, InetAddress.getByName("localhost"));
                 System.out.println("Socket starting");
@@ -68,11 +82,6 @@ public class Main {
                     socket.close();
                 }
             }
-        }
-    }
-
-    private static void runOnline() {
-
     }
 
     private static void runOffline() throws IOException {

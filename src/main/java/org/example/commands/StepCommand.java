@@ -1,4 +1,7 @@
-package org.example;
+package org.example.commands;
+
+import org.example.location.Junction;
+import org.example.location.Vehicle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +33,7 @@ public class StepCommand implements Command{
 
     @Override
     public String toString() {
-        return "";
+        return "step";
     }
 
 }

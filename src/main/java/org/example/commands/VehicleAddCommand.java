@@ -1,6 +1,7 @@
-package org.example;
+package org.example.commands;
 
-import java.util.List;
+import org.example.location.Junction;
+import org.example.location.Vehicle;
 
 public class VehicleAddCommand implements Command{
     private final String vehicleId;
@@ -33,10 +34,8 @@ public class VehicleAddCommand implements Command{
 
     @Override
     public void execute() {
-        Vehicle vehicle = new Vehicle(vehicleId);
-        junction.addVehicle(vehicle,
-                Direction.fromString(startRoad),
-                Direction.fromString(endRoad));
+        Vehicle vehicle = new Vehicle(vehicleId, startRoad, endRoad);
+        junction.addVehicle(vehicle);
     }
 
     @Override
@@ -46,7 +45,7 @@ public class VehicleAddCommand implements Command{
 
     @Override
     public String toString() {
-        return vehicleId + "," + startRoad + "," + endRoad;
+        return "addVehicle," + vehicleId + "," + startRoad + "," + endRoad;
     }
 
     public String getVehicleId() {

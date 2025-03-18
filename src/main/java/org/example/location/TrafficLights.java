@@ -1,4 +1,4 @@
-package org.example;
+package org.example.location;
 
 public class TrafficLights {
 
@@ -32,5 +32,9 @@ public class TrafficLights {
 
     public Lane getLane() {
         return lane;
+    }
+
+    public boolean equals(TrafficLights trafficLights) {
+        return road.equals(trafficLights.road) && lane.equals(trafficLights.lane);
     }
 }

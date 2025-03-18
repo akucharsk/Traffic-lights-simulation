@@ -1,7 +1,9 @@
-import org.example.*;
+import org.example.commands.Command;
+import org.example.commands.StepCommand;
+import org.example.commands.VehicleAddCommand;
+import org.example.location.*;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static junit.framework.TestCase.assertEquals;
@@ -107,13 +109,27 @@ public class TestJunction {
         assertTrue(junction.lightsOnDemand());
     }
 
-//    @Test
-//    public void testJunctionAfterStepCommands_GivenTenVehiclesOnOneLaneAndOtherVehiclesOnCollidingLanes() {
-//        setup();
-//        for (int i = 0; i < 10; i++) {
-//            Command command = new VehicleAddCommand(Integer.toString(i), "east", "west");
-//            command.setJunction(junction);
-//            command.execute();
-//        }
-//    }
+    @Test
+    public void testLightChangeWhenOneVehicleIsWaitingAndOneConfigurationMadeMoreThan20Steps() {
+        setup();
+        for (int i = 0; i < 40; i++) {
+            junction.addVehicle(new Vehicle("", Direction.NORTH, Direction.SOUTH));
+            junction.addVehicle(new Vehicle("", Direction.NORTH, Direction.WEST));
+            junction.addVehicle(new Vehicle("", Direction.SOUTH, Direction.NORTH));
+            junction.addVehicle(new Vehicle("", Direction.SOUTH, Direction.EAST));
+        }
+        for (int i = 0; i < 20; i++) {
+            assertEquals(i, junction.getActiveConfig().getActiveSteps());
+            junction.makeStep();
+        }
+        assertEquals(Junction.NORTH_SOUTH_STRAIGHT_LINE, junction.getConfigurationIdx());
+        assertEquals(20, junction.getActiveConfig().getActiveSteps());
+        assertEquals(Double.NEGATIVE_INFINITY, junction.getActiveConfig().getPriority());
+
+        junction.addVehicle(new Vehicle("", Direction.EAST, Direction.WEST));
+        junction.makeStep();
+        assertEquals(Junction.EAST_WEST_STRAIGHT_LINE, junction.getConfigurationIdx());
+        assertEquals(0, junction.getActiveConfig().getActiveSteps());
+        assertEquals(Double.POSITIVE_INFINITY, junction.getActiveConfig().getPriority());
+    }
 }

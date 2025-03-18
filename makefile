@@ -1,4 +1,5 @@
 VERSION ?= 1.1
+ARGS ?=
 
 TARGET=target/traffic-$(VERSION)-SNAPSHOT.jar
 WEB_APP='src.main.python.web:app'
@@ -7,9 +8,6 @@ WEB_APP='src.main.python.web:app'
 
 all: compile package run
 
-web: compile package
-	java -jar $(TARGET)
-
 compile:
 	@mvn compile
 
@@ -17,7 +15,7 @@ package:
 	@mvn package
 
 run:
-	java -jar $(TARGET)
+	java -jar $(TARGET) $(ARGS)
 
 clean:
 	rm -rf target

@@ -4,8 +4,8 @@ import TrafficLight from "./traffic_light.js";
 export default class CanvasHandler {
     constructor(canvas) {
         const opts = document.getElementById("opts");
-        canvas.width = (window.innerWidth - opts.clientWidth) * 0.8;
-        canvas.height = window.innerHeight * 0.9;
+        canvas.width = canvas.clientWidth;
+        canvas.height = canvas.clientHeight;
 
         this.lowestVehicleID = 0;
         this.vehicleAmount = 0;

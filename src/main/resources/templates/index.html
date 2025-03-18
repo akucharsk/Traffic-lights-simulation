@@ -1,56 +1,120 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width: device-width, initial-scale=1.0">
     <title>Traffic Lights Simulator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="/static/index.css">
+    <link rel="stylesheet" href="/css/index.css">
 </head>
 <body class="h-screen">
-<div class="flex justify-center mx-auto gap-20 w-screen">
-    <div class="flex justify-center items-center" id="opts">
+<div class="flex justify-center mx-5 gap-5 w-screen">
+    <div class="flex justify-center items-center w-1/4" id="opts">
         <div class="flex-col gap-5">
-            <div class="flex gap-5 items-center">
-                <label for="start-road" class="text-4x1 font-bold">
-                    Choose the start road:
-                </label>
-                <select id="start-road" class="p-2 my-2">
-                    <option value="north">North</option>
-                    <option value="south">South</option>
-                    <option value="east">East</option>
-                    <option value="west">West</option>
-                </select>
+            <div class="flex-col gap-5 items-center justify-center bg-gray-100 rounded-3xl">
+                <div class="italic rounded-3xl w-full bg-indigo-100 text-center justify-center items-center p-2 text-lg ">
+                    Add a vehicle
+                </div>
+                <div class="flex gap-5 rounded-xl px-5 bg-white items-center justify-center">
+                    <label for="start-road" class="text-4x1 font-bold">
+                        Choose the start road:
+                    </label>
+                    <select id="start-road" class="p-2 my-2 rounded-2xl">
+                        <option value="north">North</option>
+                        <option value="south">South</option>
+                        <option value="east">East</option>
+                        <option value="west">West</option>
+                    </select>
+                </div>
+                <div class="flex gap-5 rounded-xl px-5 bg-white items-center justify-center">
+                    <label for="end-road" class="text-4x1 font-bold">
+                        Choose the end road:
+                    </label>
+                    <select id="end-road" class="p-2 my-2 rounded-2xl">
+                        <option value="north">North</option>
+                        <option value="south">South</option>
+                        <option value="east">East</option>
+                        <option value="west">West</option>
+                    </select>
+                </div>
+                <button class="py-5 px-10 bg-blue-100 rounded-3xl border-indigo-700 font-bold text-lg mx-auto hover:bg-blue-200 active:bg-blue-400" onclick="addVehicle()">
+                    Submit
+                </button>
+                <div id="error" class="text-red-600 mx-auto text-bold"></div>
             </div>
-            <div class="flex gap-5 items-center">
-                <label for="end-road" class="text-4x1 font-bold">
-                    Choose the end road:
-                </label>
-                <select id="end-road" class="p-2 my-2">
-                    <option value="north">North</option>
-                    <option value="south">South</option>
-                    <option value="east">East</option>
-                    <option value="west">West</option>
-                </select>
-            </div>
-            <button class="p-5 bg-blue-50 font-bold text-lg" onclick="addVehicle()">
-                Submit
-            </button>
-            <div id="error" class="text-red-500"></div>
-            <button class="p-5 bg-green-100 font-bold m-y-10" onclick="makeStep()">
+            <button class="p-5 bg-green-100 rounded-3xl border-2 border-indigo-700 font-bold m-y-10 hover:bg-green-200 active:bg-green-400" onclick="makeStep()">
                 Make Step
             </button>
+            <div class="flex justify-center items-center">
+                <button class="mx-auto px-5 py-2 text-lg font-bold bg-red-500 hover:bg-red-700 active:bg-red-900 text-white rounded-xl w-1/3"
+                        onclick="recordCommands()"
+                        id="recording"
+                >
+                    Record commands
+                </button>
+                <button class="mx-auto px-5 py-2 text-lg font-bold bg-blue-500 hover:bg-blue-700 active:bg-blue-900 text-white rounded-xl w-1/3"
+                        onclick="downloadRecording()"
+                        id="download-recording"
+                >
+                    Download commands
+                </button>
+            </div>
+            <div class="flex-col gap-10">
+                <div id="dropzone"
+                     class="border-2 border-blue bg-zinc-100 justify-center items-center p-10 italic">
+                    Drop your commands JSON file here
+                </div>
+                <div class="flex justify-center items-center gap-10">
+                    <button id="next-command"
+                            disabled
+                            class="mx-auto border-2 border-black justify-center items-center p-4 w-2/5 font-bold bg-blue-100 hover:bg-blue-200 active:bg-blue-500 rounded-3xl"
+                            onclick="nextCommand()"
+                    >
+                        Next command
+                    </button>
+                    <button id="report"
+                            class="mx-auto border-2 border-black justify-center items-center p-4 w-2/5 font-bold italic bg-green-100 hover:bg-green-200 active:bg-green-500 rounded-3xl"
+                            onclick="downloadReport()"
+                            >
+                        Download report
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
-    <canvas class="my-10" id="main-canvas"></canvas>
+    <canvas class="my-10 w-full h-screen" id="main-canvas"></canvas>
 </div>
 </body>
-<script src="/static/index.js"></script>
+<script src="/js/index.js"></script>
 
 <script type="module">
-    import CanvasHandler from "/static/canvas_handler.js";
+    import CanvasHandler from "/js/canvas_handler.js";
 
     const canvas = document.getElementById("main-canvas");
     window.canvasHandler = new CanvasHandler(canvas);
+
+    const dropzone = document.getElementById("dropzone");
+    dropzone.ondragover = (event) => {
+        event.preventDefault();
+    }
+    dropzone.ondragenter = (event) => {
+        event.preventDefault();
+        dropzone.classList.remove("bg-zinc-100");
+        dropzone.classList.add("bg-zinc-200");
+    }
+    dropzone.ondragleave = (event) => {
+        event.preventDefault();
+        dropzone.classList.remove("bg-zinc-200");
+        dropzone.classList.add("bg-zinc-100");
+    }
+    dropzone.ondrop = (event) => {
+        event.preventDefault();
+        const file = event.dataTransfer.files[0];
+        if (file) {
+            dropzone.classList.remove("bg-zinc-200");
+            dropzone.classList.add("bg-zinc-100");
+            uploadCommands(file);
+        }
+    }
 </script>
 </html>

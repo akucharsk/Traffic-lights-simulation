@@ -1,4 +1,4 @@
-package org.example;
+package org.example.location;
 
 public enum Lane {
     LEFT, MIDDLE, RIGHT;

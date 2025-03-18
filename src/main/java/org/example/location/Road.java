@@ -1,4 +1,4 @@
-package org.example;
+package org.example.location;
 
 
 import java.util.HashMap;

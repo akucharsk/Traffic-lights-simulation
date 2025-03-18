@@ -1,4 +1,4 @@
-package org.example;
+package org.example.json;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
@@ -6,12 +6,15 @@ import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import org.example.commands.Program;
+import org.example.commands.StepCommand;
+import org.example.commands.VehicleAddCommand;
 
 import java.io.IOException;
 
 public class ProgramDeserializer extends StdDeserializer<Program> {
 
-    protected ProgramDeserializer(Class<Program> vc) {
+    public ProgramDeserializer(Class<Program> vc) {
         super(vc);
     }
 

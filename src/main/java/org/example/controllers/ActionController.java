@@ -19,13 +19,14 @@ import org.example.location.Vehicle;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-@RestController
+@Controller
 @RequestMapping("/api")
 public class ActionController {
     private Junction junction;

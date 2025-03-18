@@ -1,15 +1,15 @@
-package org.example;
+package org.example.location;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Junction {
     private final Map<Direction, Road> roads = new HashMap<>();
     private final List<TrafficLightsConfiguration> configurations = new ArrayList<>();
     private int configurationIdx = 0;
     private boolean lightsOnDemand = true;
+    private final int id;
+
+    private static int junctionCounter = 0;
 
     public static final int NORTH_SOUTH_STRAIGHT_LINE = 0;
     public static final int EAST_WEST_STRAIGHT_LINE = 1;
@@ -17,6 +17,8 @@ public class Junction {
     public static final int EAST_WEST_LEFT_TURN = 3;
 
     public Junction() {
+        Junction.junctionCounter++;
+        id = junctionCounter;
         roads.put(Direction.NORTH, new Road(Direction.NORTH));
         roads.put(Direction.SOUTH, new Road(Direction.SOUTH));
         roads.put(Direction.EAST, new Road(Direction.EAST));
@@ -48,7 +50,9 @@ public class Junction {
         )));
     }
 
-    public void addVehicle(Vehicle vehicle, Direction from, Direction to) {
+    public void addVehicle(Vehicle vehicle) {
+        Direction from = vehicle.getStartRoadDirection();
+        Direction to = vehicle.getEndRoadDirection();
         Road road = roads.get(from);
         road.addVehicle(Lane.appropriateLane(from, to), vehicle);
 
@@ -71,16 +75,9 @@ public class Junction {
     }
 
     public List<Vehicle> makeStep() {
-        List<Vehicle> departedVehicles = new ArrayList<>();
-        for (TrafficLights lights : configurations.get(configurationIdx).getParallelLights()) {
-            Road road = lights.getRoad();
-            Lane lane = lights.getLane();
-
-            Vehicle departed = road.removeVehicle(lane);
-            if (departed != null)
-                departedVehicles.add(departed);
-        }
         TrafficLightsConfiguration config = configurations.get(configurationIdx);
+        List<Vehicle> departedVehicles = config.moveVehicles();
+
         config.registerActiveStep();
 
         double priority = config.getPriority();
@@ -107,11 +104,31 @@ public class Junction {
             return departedVehicles;
 
         configurationIdx = firstLiveConfigIdx;
+        configurationIdx = getPossibleUpgrade();
         config.deactivateLights();
         config = configurations.get(configurationIdx);
         config.activateLights();
 
         return departedVehicles;
+    }
+
+    private int getPossibleUpgrade() {
+        TrafficLightsConfiguration config = configurations.get(configurationIdx);
+        Set<TrafficLights> rightTurnLights = config.getRightTurnLights();
+        int nonRightTurners = config.getNonRightTurnVehicles();
+        if (nonRightTurners > 0)
+            return configurationIdx;
+        int i = (configurationIdx + 1) % configurations.size();
+        while (i != configurationIdx) {
+            nonRightTurners = configurations.get(i).getNonRightTurnVehicles();
+            Set<TrafficLights> otherRightTurnLights =
+                    configurations.get(i).getRightTurnLights();
+            if (!rightTurnLights.containsAll(otherRightTurnLights) && nonRightTurners > 0)
+                return configurationIdx;
+            if (nonRightTurners > 0)
+                return i;
+        }
+        return configurationIdx;
     }
 
     public TrafficLightsConfiguration getActiveConfiguration() {

@@ -1,7 +1,9 @@
-package org.example;
+package org.example.location;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TrafficLightsConfiguration {
@@ -9,6 +11,9 @@ public class TrafficLightsConfiguration {
     private int passiveSteps = 0;
     private final List<TrafficLights> parallelLights = new ArrayList<>();
     private boolean isActive = false;
+
+    public static final int MAXIMUM_ACTIVE_STEPS = 20;
+    public static final int GUARANTEED_STEPS = 5;
 
     public TrafficLightsConfiguration(List<TrafficLights> lights) {
         parallelLights.addAll(lights);
@@ -28,11 +33,11 @@ public class TrafficLightsConfiguration {
     public double getPriority() {
         int waitingVehicles = getWaitingVehicles();
         int stepsTillEmpty = getStepsTillEmpty();
-        if (isActive && waitingVehicles > 0 && activeSteps < 5) {
+        if (isActive && waitingVehicles > 0 && activeSteps < GUARANTEED_STEPS) {
             return Double.POSITIVE_INFINITY;
         }
 
-        if (waitingVehicles == 0) {
+        if (waitingVehicles == 0 || activeSteps >= MAXIMUM_ACTIVE_STEPS) {
             return Double.NEGATIVE_INFINITY;
         }
 
@@ -43,6 +48,19 @@ public class TrafficLightsConfiguration {
                     (double) redLightVehicles / stepsTillEmpty;
         }
         return (double) waitingVehicles / (stepsTillEmpty + activeSteps - 5);
+    }
+
+    public List<Vehicle> moveVehicles() {
+        List<Vehicle> departedVehicles = new ArrayList<>();
+        for (TrafficLights lights : getParallelLights()) {
+            Road road = lights.getRoad();
+            Lane lane = lights.getLane();
+
+            Vehicle departed = road.removeVehicle(lane);
+            if (departed != null)
+                departedVehicles.add(departed);
+        }
+        return departedVehicles;
     }
 
     public List<TrafficLights> getParallelLights() {
@@ -63,6 +81,21 @@ public class TrafficLightsConfiguration {
         return parallelLights
                 .stream()
                 .filter(TrafficLights::isRed)
+                .map(lights -> lights.getRoad().getVehicles(lights.getLane()).size())
+                .reduce(0, Integer::sum);
+    }
+
+    public Set<TrafficLights> getRightTurnLights() {
+        return parallelLights
+                .stream()
+                .filter(lights -> lights.getLane() == Lane.RIGHT)
+                .collect(Collectors.toSet());
+    }
+
+    public int getNonRightTurnVehicles() {
+        return parallelLights
+                .stream()
+                .filter(lights -> lights.getLane() != Lane.RIGHT)
                 .map(lights -> lights.getRoad().getVehicles(lights.getLane()).size())
                 .reduce(0, Integer::sum);
     }

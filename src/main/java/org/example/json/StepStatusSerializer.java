@@ -1,14 +1,16 @@
-package org.example;
+package org.example.json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import org.example.StepStatus;
+import org.example.location.Vehicle;
 
 import java.io.IOException;
 import java.util.List;
 
 public class StepStatusSerializer extends StdSerializer<StepStatus> {
-    protected StepStatusSerializer(Class<StepStatus> t) {
+    public StepStatusSerializer(Class<StepStatus> t) {
         super(t);
     }
 

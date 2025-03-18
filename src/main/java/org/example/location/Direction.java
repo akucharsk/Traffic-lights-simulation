@@ -1,4 +1,4 @@
-package org.example;
+package org.example.location;
 
 public enum Direction {
     NORTH, SOUTH, EAST, WEST;

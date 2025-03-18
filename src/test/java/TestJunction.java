@@ -1,7 +1,12 @@
-import org.example.*;
+import org.example.commands.Command;
+import org.example.commands.StepCommand;
+import org.example.commands.VehicleAddCommand;
+import org.example.location.Direction;
+import org.example.location.Junction;
+import org.example.location.Lane;
+import org.example.location.Road;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static junit.framework.TestCase.assertEquals;

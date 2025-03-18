@@ -22,7 +22,6 @@ async function addVehicle(id = null,
         }
     )
     const lane = await resp.text();
-    console.log(lane);
     await window.canvasHandler.addVehicle(vehicleID, start, end, lane);
 
     if (window.canvasHandler.vehicleAmount === 1)

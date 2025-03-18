@@ -17,6 +17,7 @@ public class TestRoad {
 
     @Test
     public void testAddVehicleToAllLanes() {
+        setup();
         road.addVehicle(Lane.LEFT, new Vehicle());
         road.addVehicle(Lane.RIGHT, new Vehicle());
         road.addVehicle(Lane.LEFT, new Vehicle());
@@ -29,6 +30,7 @@ public class TestRoad {
 
     @Test
     public void testRemoveVehicleFromAllLanes() {
+        setup();
         road.addVehicle(Lane.LEFT, new Vehicle("1"));
         road.addVehicle(Lane.RIGHT, new Vehicle("2"));
         road.addVehicle(Lane.LEFT, new Vehicle("3"));

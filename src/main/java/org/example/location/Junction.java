@@ -7,9 +7,6 @@ public class Junction {
     private final List<TrafficLightsConfiguration> configurations = new ArrayList<>();
     private int configurationIdx = 0;
     private boolean lightsOnDemand = true;
-    private final int id;
-
-    private static int junctionCounter = 0;
 
     public static final int NORTH_SOUTH_STRAIGHT_LINE = 0;
     public static final int EAST_WEST_STRAIGHT_LINE = 1;
@@ -17,8 +14,6 @@ public class Junction {
     public static final int EAST_WEST_LEFT_TURN = 3;
 
     public Junction() {
-        Junction.junctionCounter++;
-        id = junctionCounter;
         roads.put(Direction.NORTH, new Road(Direction.NORTH));
         roads.put(Direction.SOUTH, new Road(Direction.SOUTH));
         roads.put(Direction.EAST, new Road(Direction.EAST));
@@ -54,18 +49,20 @@ public class Junction {
         Direction from = vehicle.getStartRoadDirection();
         Direction to = vehicle.getEndRoadDirection();
         Road road = roads.get(from);
-        road.addVehicle(Lane.appropriateLane(from, to), vehicle);
+        Lane lane = Lane.appropriateLane(from, to);
+        road.addVehicle(lane, vehicle);
 
-        if (lightsOnDemand) {
-            configurations.get(configurationIdx).deactivateLights();
-            lightsOnDemand = false;
-            for (int i = 0; i < configurations.size(); i++) {
-                if (configurations.get(i).getWaitingVehicles() > 0) {
-                    configurationIdx = i;
-                    configurations.get(i).activateLights();
-                    System.out.println(configurationIdx);
-                    break;
-                }
+        if (!lightsOnDemand) {
+            return;
+        }
+        configurations.get(configurationIdx).deactivateLights();
+        lightsOnDemand = false;
+        for (int i = 0; i < configurations.size(); i++) {
+            if (configurations.get(i).getWaitingVehicles() > 0) {
+                configurationIdx = i;
+                configurations.get(i).activateLights();
+                System.out.println(configurationIdx);
+                break;
             }
         }
     }
@@ -78,14 +75,16 @@ public class Junction {
         TrafficLightsConfiguration config = configurations.get(configurationIdx);
         List<Vehicle> departedVehicles = config.moveVehicles();
 
-        config.registerActiveStep();
-
         double priority = config.getPriority();
 
         int firstLiveConfigIdx = -1;
         int bestPriorityIdx = configurationIdx;
         int i = (configurationIdx + 1) % configurations.size();
         while (i != configurationIdx) {
+            if (configurations.get(i).getRedLightVehicles() == 0) {
+                i = (i + 1) % configurations.size();
+                continue;
+            }
             double configPriority = configurations.get(i).getPriority();
             if (firstLiveConfigIdx < 0 && configPriority > Double.NEGATIVE_INFINITY)
                 firstLiveConfigIdx = i;
@@ -96,15 +95,21 @@ public class Junction {
             }
             i = (i + 1) % configurations.size();
         }
+        if (firstLiveConfigIdx < 0 && config.getWaitingVehicles() > 0)
+            return departedVehicles;
+
         if (firstLiveConfigIdx < 0) {
             lightsOnDemand = true;
             return departedVehicles;
         }
         if (bestPriorityIdx == configurationIdx)
             return departedVehicles;
-
+        int prev = configurationIdx;
         configurationIdx = firstLiveConfigIdx;
         configurationIdx = getPossibleUpgrade();
+        if (prev == configurationIdx) {
+            return departedVehicles;
+        }
         config.deactivateLights();
         config = configurations.get(configurationIdx);
         config.activateLights();
@@ -127,11 +132,18 @@ public class Junction {
                 return configurationIdx;
             if (nonRightTurners > 0)
                 return i;
+            i = (i + 1) % configurations.size();
         }
         return configurationIdx;
     }
 
-    public TrafficLightsConfiguration getActiveConfiguration() {
+    public boolean isEmpty() {
+        return configurations
+                .stream()
+                .allMatch(config -> config.getWaitingVehicles() == 0);
+    }
+
+    public TrafficLightsConfiguration getActiveConfig() {
         return configurations.get(configurationIdx);
     }
 

@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 
 public class TrafficLightsConfiguration {
     private int activeSteps = 0;
-    private int passiveSteps = 0;
     private final List<TrafficLights> parallelLights = new ArrayList<>();
     private boolean isActive = false;
 
@@ -18,6 +17,8 @@ public class TrafficLightsConfiguration {
     public TrafficLightsConfiguration(List<TrafficLights> lights) {
         parallelLights.addAll(lights);
     }
+
+    public int getActiveSteps() {return activeSteps;}
 
     public void activateLights() {
         isActive = true;
@@ -47,7 +48,7 @@ public class TrafficLightsConfiguration {
                     Double.NEGATIVE_INFINITY :
                     (double) redLightVehicles / stepsTillEmpty;
         }
-        return (double) waitingVehicles / (stepsTillEmpty + activeSteps - 5);
+        return (double) waitingVehicles / (stepsTillEmpty + 2 * activeSteps - 10);
     }
 
     public List<Vehicle> moveVehicles() {
@@ -60,7 +61,14 @@ public class TrafficLightsConfiguration {
             if (departed != null)
                 departedVehicles.add(departed);
         }
+        registerActiveStep();
         return departedVehicles;
+    }
+
+    public boolean containsVehicle(Vehicle vehicle) {
+        return parallelLights
+                .stream()
+                .anyMatch(light -> light.getRoad().getVehicles(light.getLane()).contains(vehicle));
     }
 
     public List<TrafficLights> getParallelLights() {

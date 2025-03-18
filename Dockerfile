@@ -10,6 +10,6 @@ RUN mvn clean package
 FROM openjdk:17
 
 WORKDIR /app
-COPY --from=java-build /app/target/*.jar server.jar
-VOLUME data ./data
+COPY --from=java-build /app/target/traffic-1.1-.jar server.jar
+VOLUME ["/app/output"]
 ENTRYPOINT ["java", "-jar", "server.jar"]

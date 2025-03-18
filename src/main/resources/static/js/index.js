@@ -92,7 +92,9 @@ async function download(url) {
 }
 
 async function downloadReport() {
-    const filename = prompt("File name:", "report.json");
+    const filename = prompt("File name:", "report");
+    if (!filename)
+        return;
     await download(`/api/report/download/${filename}.json`);
 }
 
@@ -112,6 +114,8 @@ async function recordCommands() {
 }
 
 async function downloadRecording() {
-    const filename = prompt("File name:", "commands.json");
-    await download(`/api/recording/download/${filename}`);
+    const filename = prompt("File name:", "commands");
+    if (!filename)
+        return
+    await download(`/api/recording/download/${filename}.json`);
 }

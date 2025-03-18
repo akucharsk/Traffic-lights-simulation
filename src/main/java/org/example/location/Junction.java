@@ -90,8 +90,8 @@ public class Junction {
                 firstLiveConfigIdx = i;
 
             if (configPriority > priority) {
-                priority = configPriority;
                 bestPriorityIdx = i;
+                break;
             }
             i = (i + 1) % configurations.size();
         }

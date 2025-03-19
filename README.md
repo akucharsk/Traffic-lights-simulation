@@ -17,6 +17,18 @@ in two forms:
 doesn't have a GUI visualization.
   2. Launch a Spring Boot web server and dynamically manage the state of the junction by adding vehicles or making them move. Once launched visit http://localhost:8080
 
+If you **don't intend to use Docker** make sure you have:
+- **Java 17+**
+- **Maven 3.9.6 or later**  
+  Download from [Maven's official site](https://maven.apache.org/download.cgi).
+
+## Download the project
+In the directory you want to place your project run
+```
+git clone https://github.com/akucharsk/Traffic-lights-simulation
+cd Traffic-lights-simulation
+```
+
 ## Build and run using a Makefile
 
 **Build and run the web service**:

@@ -166,7 +166,7 @@ The formula below was developed empirically:
 
 $$P(A, V, E, on)=\begin{cases}
 \infty & \text{if} & on \wedge A < 5 \wedge V > 0\\
--\infty & \text{if} & !on \vee A \geq 20 \vee V == 0\\
+-\infty & \text{if} & A \geq 20 \vee V == 0\\
 \frac{V}{E} & \text{if} & !on\\
 \frac{V}{E + 2A - 10} & \text{if} & on
 \end{cases}$$

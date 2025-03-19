@@ -73,7 +73,7 @@ java -jar target/traffic-1.1-SNAPSHOT.jar input.json output.json
 java -jar target/traffic-1.1-SNAPSHOT.jar
 ```
 
-### Requirements for a single simulation
+## Requirements for a single simulation
 As stated above you will need an input file. Name it whatever you want, I'll be refering it as `input.json`. Same rule for `output.json`. The `input.json` file **must** be placed
 in the `src/main/resources/` directory in order for the program to work correctly.
 
